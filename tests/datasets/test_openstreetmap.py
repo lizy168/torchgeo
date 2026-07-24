@@ -578,7 +578,7 @@ class TestOpenStreetMap:
             # Invalid cases
             ([], ValueError, 'classes must be a non-empty list'),
             ('invalid', ValueError, 'classes must be a non-empty list'),
-            (['invalid'], ValueError, 'Class 0 must be a dictionary'),
+            (['invalid'], TypeError, 'Class 0 must be a dictionary'),
             (
                 [{'name': 'test'}],
                 ValueError,
@@ -586,12 +586,12 @@ class TestOpenStreetMap:
             ),
             (
                 [{'name': 'test', 'selector': 'invalid'}],
-                ValueError,
+                TypeError,
                 'Class 0 selector must be a list',
             ),
             (
                 [{'name': 'test', 'selector': ['invalid']}],
-                ValueError,
+                TypeError,
                 'Class 0 selector 0 must be a dictionary',
             ),
         ],
