@@ -152,6 +152,7 @@ class OpenStreetMap(VectorDataset):
                 with 'name' (str) and 'selector' (list[dict[str, str | list[str]]]) keys.
 
         Raises:
+            TypeError: if classes configuration is not a list of dicts
             ValueError: if classes configuration is invalid
         """
         if not isinstance(classes, list) or not classes:
@@ -159,14 +160,14 @@ class OpenStreetMap(VectorDataset):
 
         for i, class_def in enumerate(classes):
             if not isinstance(class_def, dict):
-                raise ValueError(f'Class {i} must be a dictionary')
+                raise TypeError(f'Class {i} must be a dictionary')
             if 'name' not in class_def or 'selector' not in class_def:
                 raise ValueError(f'Class {i} must have "name" and "selector" keys')
             if not isinstance(class_def['selector'], list):
-                raise ValueError(f'Class {i} selector must be a list')
+                raise TypeError(f'Class {i} selector must be a list')
             for j, selector in enumerate(class_def['selector']):
                 if not isinstance(selector, dict):
-                    raise ValueError(f'Class {i} selector {j} must be a dictionary')
+                    raise TypeError(f'Class {i} selector {j} must be a dictionary')
 
     def _get_data_filename(self) -> pathlib.Path:
         """Get the filename for the cached data file.
@@ -269,7 +270,7 @@ class OpenStreetMap(VectorDataset):
 
             except ValueError:
                 raise
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 last_exception = e
                 continue
 

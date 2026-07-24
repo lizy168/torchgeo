@@ -6,7 +6,7 @@
 import json
 import os
 from collections.abc import Callable, Sequence
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import ClassVar, TypedDict
 
 import matplotlib.pyplot as plt
@@ -391,7 +391,7 @@ class MMEarth(NonGeoDataset):
             dictionary containing the specific band names for each modality
         """
         date_str = tile_info['S2_DATE']
-        date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+        date_obj = datetime.strptime(date_str, '%Y-%m-%d').replace(tzinfo=UTC)
         curr_month_str = date_obj.strftime('%Y%m')
         # set to first day of month and subtract one day to get previous month
         prev_month_obj = date_obj.replace(day=1) - timedelta(days=1)

@@ -13,12 +13,11 @@ import pandas as pd
 import pytest
 import shapely
 import torch
-import torch.nn as nn
 from _pytest.fixtures import SubRequest
 from geopandas import GeoDataFrame
 from pyproj import CRS
 from rasterio.enums import Resampling
-from torch import Tensor
+from torch import Tensor, nn
 from torch.utils.data import ConcatDataset
 
 from torchgeo.datasets import (
@@ -46,10 +45,11 @@ class CustomGeoDataset(GeoDataset):
         bounds: Sequence[
             tuple[float, float, float, float, pd.Timestamp, pd.Timestamp]
         ] = [(0, 1, 2, 3, MINT, MAXT)],
-        crs: CRS = CRS.from_epsg(4087),
+        crs: CRS | None = None,
         res: float | tuple[float, float] = (1, 1),
         paths: str | os.PathLike[str] | Iterable[str | os.PathLike[str]] | None = None,
     ) -> None:
+        crs = crs or CRS.from_epsg(4087)
         data = {'filepath': ['file.tif'] * len(bounds)}
         geometry = [shapely.box(b[0], b[2], b[1], b[3]) for b in bounds]
         index = pd.IntervalIndex.from_tuples(

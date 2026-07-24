@@ -534,7 +534,7 @@ class TestOpenStreetMap:
 
         # Make all requests fail
         def mock_post_fail(*_: Any, **__: Any) -> NoReturn:
-            raise Exception('Connection failed')
+            raise TypeError('Connection failed')
 
         monkeypatch.setattr(
             'torchgeo.datasets.openstreetmap.requests.post', mock_post_fail

@@ -1,7 +1,7 @@
 # Copyright (c) TorchGeo Contributors. All rights reserved.
 # Licensed under the MIT License.
 
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -82,7 +82,7 @@ class TestAurora:
             metadata=Metadata(
                 lat=torch.linspace(90, -90, h),
                 lon=torch.linspace(0, 360, w + 1)[:-1],
-                time=(datetime(2020, 6, 1, 12, 0),),
+                time=(datetime(2020, 6, 1, 12, 0, tzinfo=UTC),),
                 atmos_levels=(100, 250, 500, 850),
             ),
         )

@@ -5,7 +5,7 @@ import os
 import pickle
 import re
 import shutil
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -40,8 +40,8 @@ from torchgeo.datasets.utils import (
     working_dir,
 )
 
-MINT = datetime(2025, 4, 24)
-MAXT = datetime(2025, 4, 25)
+MINT = datetime(2025, 4, 24, tzinfo=UTC)
+MAXT = datetime(2025, 4, 25, tzinfo=UTC)
 
 
 @pytest.mark.filterwarnings(
@@ -91,14 +91,9 @@ class TestBoundingBox:
             # One corner of bbox1 within bbox2
             ((0.5, 1.5, 0.5, 1.5, MINT, MAXT), False),
             ((0.5, 1.5, -0.5, 0.5, MINT, MAXT), False),
-            ((0.5, 1.5, 0.5, 1.5, MINT, MAXT), False),
-            ((0.5, 1.5, -0.5, 0.5, MINT, MAXT), False),
-            ((-0.5, 0.5, 0.5, 1.5, MINT, MAXT), False),
-            ((-0.5, 0.5, -0.5, 0.5, MINT, MAXT), False),
             ((-0.5, 0.5, 0.5, 1.5, MINT, MAXT), False),
             ((-0.5, 0.5, -0.5, 0.5, MINT, MAXT), False),
             # No overlap
-            ((0.5, 1.5, 0.5, 1.5, MINT, MAXT), False),
             ((0.5, 1.5, 2, 3, MINT, MAXT), False),
             ((2, 3, 0.5, 1.5, MINT, MAXT), False),
             ((2, 3, 2, 3, MINT, MAXT), False),
@@ -126,14 +121,9 @@ class TestBoundingBox:
             # One corner of bbox1 within bbox2
             ((0.5, 1.5, 0.5, 1.5, MINT, MAXT), (0, 1.5, 0, 1.5, MINT, MAXT)),
             ((0.5, 1.5, -0.5, 0.5, MINT, MAXT), (0, 1.5, -0.5, 1, MINT, MAXT)),
-            ((0.5, 1.5, 0.5, 1.5, MINT, MAXT), (0, 1.5, 0, 1.5, MINT, MAXT)),
-            ((0.5, 1.5, -0.5, 0.5, MINT, MAXT), (0, 1.5, -0.5, 1, MINT, MAXT)),
-            ((-0.5, 0.5, 0.5, 1.5, MINT, MAXT), (-0.5, 1, 0, 1.5, MINT, MAXT)),
-            ((-0.5, 0.5, -0.5, 0.5, MINT, MAXT), (-0.5, 1, -0.5, 1, MINT, MAXT)),
             ((-0.5, 0.5, 0.5, 1.5, MINT, MAXT), (-0.5, 1, 0, 1.5, MINT, MAXT)),
             ((-0.5, 0.5, -0.5, 0.5, MINT, MAXT), (-0.5, 1, -0.5, 1, MINT, MAXT)),
             # No overlap
-            ((0.5, 1.5, 0.5, 1.5, MINT, MAXT), (0, 1.5, 0, 1.5, MINT, MAXT)),
             ((0.5, 1.5, 2, 3, MINT, MAXT), (0, 1.5, 0, 3, MINT, MAXT)),
             ((2, 3, 0.5, 1.5, MINT, MAXT), (0, 3, 0, 1.5, MINT, MAXT)),
             ((2, 3, 2, 3, MINT, MAXT), (0, 3, 0, 3, MINT, MAXT)),
@@ -165,10 +155,6 @@ class TestBoundingBox:
             # One corner of bbox1 within bbox2
             ((0.5, 1.5, 0.5, 1.5, MINT, MAXT), (0.5, 1, 0.5, 1, MINT, MAXT)),
             ((0.5, 1.5, -0.5, 0.5, MINT, MAXT), (0.5, 1, 0, 0.5, MINT, MAXT)),
-            ((0.5, 1.5, 0.5, 1.5, MINT, MAXT), (0.5, 1, 0.5, 1, MINT, MAXT)),
-            ((0.5, 1.5, -0.5, 0.5, MINT, MAXT), (0.5, 1, 0, 0.5, MINT, MAXT)),
-            ((-0.5, 0.5, 0.5, 1.5, MINT, MAXT), (0, 0.5, 0.5, 1, MINT, MAXT)),
-            ((-0.5, 0.5, -0.5, 0.5, MINT, MAXT), (0, 0.5, 0, 0.5, MINT, MAXT)),
             ((-0.5, 0.5, 0.5, 1.5, MINT, MAXT), (0, 0.5, 0.5, 1, MINT, MAXT)),
             ((-0.5, 0.5, -0.5, 0.5, MINT, MAXT), (0, 0.5, 0, 0.5, MINT, MAXT)),
         ],
@@ -187,7 +173,14 @@ class TestBoundingBox:
         'test_input',
         [
             # No overlap
-            (0.5, 1.5, 0.5, 1.5, datetime(2025, 4, 26), datetime(2025, 4, 27)),
+            (
+                0.5,
+                1.5,
+                0.5,
+                1.5,
+                datetime(2025, 4, 26, tzinfo=UTC),
+                datetime(2025, 4, 27, tzinfo=UTC),
+            ),
             (0.5, 1.5, 2, 3, MINT, MAXT),
             (2, 3, 0.5, 1.5, MINT, MAXT),
             (2, 3, 2, 3, MINT, MAXT),
@@ -211,11 +204,11 @@ class TestBoundingBox:
             ((0, 1, 0, 1, MINT, MAXT), 1),
             ((0, 2, 0, 3, MINT, MAXT), 6),
             # Plane
-            ((0, 0, 0, 1, MINT, MAXT), 0),
+            ((0, 1, 0, 1, MINT, MINT), 1),
             # Line
-            ((0, 0, 0, 0, MINT, MAXT), 0),
+            ((0, 1, 0, 0, MINT, MINT), 0),
             # Point
-            ((0, 0, 0, 0, MINT, MAXT), 0),
+            ((0, 0, 0, 0, MINT, MINT), 0),
         ],
     )
     def test_area(
@@ -233,11 +226,11 @@ class TestBoundingBox:
             ((0, 1, 0, 1, MINT, MAXT), timedelta(days=1)),
             ((0, 2, 0, 3, MINT, MAXT), timedelta(days=6)),
             # Plane
-            ((0, 0, 0, 1, MINT, MAXT), timedelta(days=0)),
+            ((0, 1, 0, 1, MINT, MINT), timedelta(days=0)),
             # Line
-            ((0, 0, 0, 0, MINT, MAXT), timedelta(days=0)),
+            ((0, 1, 0, 0, MINT, MINT), timedelta(days=0)),
             # Point
-            ((0, 0, 0, 0, MINT, MAXT), timedelta(days=0)),
+            ((0, 0, 0, 0, MINT, MINT), timedelta(days=0)),
         ],
     )
     def test_volume(
@@ -261,14 +254,20 @@ class TestBoundingBox:
             # One corner of bbox1 within bbox2
             ((0.5, 1.5, 0.5, 1.5, MINT, MAXT), True),
             ((0.5, 1.5, -0.5, 0.5, MINT, MAXT), True),
-            ((0.5, 1.5, 0.5, 1.5, MINT, MAXT), True),
-            ((0.5, 1.5, -0.5, 0.5, MINT, MAXT), True),
-            ((-0.5, 0.5, 0.5, 1.5, MINT, MAXT), True),
-            ((-0.5, 0.5, -0.5, 0.5, MINT, MAXT), True),
             ((-0.5, 0.5, 0.5, 1.5, MINT, MAXT), True),
             ((-0.5, 0.5, -0.5, 0.5, MINT, MAXT), True),
             # No overlap
-            ((0.5, 1.5, 0.5, 1.5, datetime(2025, 4, 26), datetime(2025, 4, 27)), False),
+            (
+                (
+                    0.5,
+                    1.5,
+                    0.5,
+                    1.5,
+                    datetime(2025, 4, 26, tzinfo=UTC),
+                    datetime(2025, 4, 27, tzinfo=UTC),
+                ),
+                False,
+            ),
             ((0.5, 1.5, 2, 3, MINT, MAXT), False),
             ((2, 3, 0.5, 1.5, MINT, MAXT), False),
             ((2, 3, 2, 3, MINT, MAXT), False),
@@ -419,62 +418,62 @@ def test_download_and_extract_archive(tmp_path: Path) -> None:
         (
             '2021',
             '%Y',
-            datetime(2021, 1, 1, 0, 0, 0, 0),
-            datetime(2021, 12, 31, 23, 59, 59, 999999),
+            datetime(2021, 1, 1, 0, 0, 0, 0, tzinfo=UTC),
+            datetime(2021, 12, 31, 23, 59, 59, 999999, tzinfo=UTC),
         ),
         (
             '2021-09',
             '%Y-%m',
-            datetime(2021, 9, 1, 0, 0, 0, 0),
-            datetime(2021, 9, 30, 23, 59, 59, 999999),
+            datetime(2021, 9, 1, 0, 0, 0, 0, tzinfo=UTC),
+            datetime(2021, 9, 30, 23, 59, 59, 999999, tzinfo=UTC),
         ),
         (
             'Dec 21',
             '%b %y',
-            datetime(2021, 12, 1, 0, 0, 0, 0),
-            datetime(2021, 12, 31, 23, 59, 59, 999999),
+            datetime(2021, 12, 1, 0, 0, 0, 0, tzinfo=UTC),
+            datetime(2021, 12, 31, 23, 59, 59, 999999, tzinfo=UTC),
         ),
         (
             '2021-09-13',
             '%Y-%m-%d',
-            datetime(2021, 9, 13, 0, 0, 0, 0),
-            datetime(2021, 9, 13, 23, 59, 59, 999999),
+            datetime(2021, 9, 13, 0, 0, 0, 0, tzinfo=UTC),
+            datetime(2021, 9, 13, 23, 59, 59, 999999, tzinfo=UTC),
         ),
         (
             '2021-09-13 17',
             '%Y-%m-%d %H',
-            datetime(2021, 9, 13, 17, 0, 0, 0),
-            datetime(2021, 9, 13, 17, 59, 59, 999999),
+            datetime(2021, 9, 13, 17, 0, 0, 0, tzinfo=UTC),
+            datetime(2021, 9, 13, 17, 59, 59, 999999, tzinfo=UTC),
         ),
         (
             '2021-09-13 17:21',
             '%Y-%m-%d %H:%M',
-            datetime(2021, 9, 13, 17, 21, 0, 0),
-            datetime(2021, 9, 13, 17, 21, 59, 999999),
+            datetime(2021, 9, 13, 17, 21, 0, 0, tzinfo=UTC),
+            datetime(2021, 9, 13, 17, 21, 59, 999999, tzinfo=UTC),
         ),
         (
             '2021-09-13 17:21:53',
             '%Y-%m-%d %H:%M:%S',
-            datetime(2021, 9, 13, 17, 21, 53, 0),
-            datetime(2021, 9, 13, 17, 21, 53, 999999),
+            datetime(2021, 9, 13, 17, 21, 53, 0, tzinfo=UTC),
+            datetime(2021, 9, 13, 17, 21, 53, 999999, tzinfo=UTC),
         ),
         (
             '2021-09-13 17:21:53:000123',
             '%Y-%m-%d %H:%M:%S:%f',
-            datetime(2021, 9, 13, 17, 21, 53, 123),
-            datetime(2021, 9, 13, 17, 21, 53, 123),
+            datetime(2021, 9, 13, 17, 21, 53, 123, tzinfo=UTC),
+            datetime(2021, 9, 13, 17, 21, 53, 123, tzinfo=UTC),
         ),
         (
             '2021-09-13%2017:21:53',
             '%Y-%m-%d%%20%H:%M:%S',
-            datetime(2021, 9, 13, 17, 21, 53, 0),
-            datetime(2021, 9, 13, 17, 21, 53, 999999),
+            datetime(2021, 9, 13, 17, 21, 53, 0, tzinfo=UTC),
+            datetime(2021, 9, 13, 17, 21, 53, 999999, tzinfo=UTC),
         ),
         (
             '2021%m',
             '%Y%%m',
-            datetime(2021, 1, 1, 0, 0, 0, 0),
-            datetime(2021, 12, 31, 23, 59, 59, 999999),
+            datetime(2021, 1, 1, 0, 0, 0, 0, tzinfo=UTC),
+            datetime(2021, 12, 31, 23, 59, 59, 999999, tzinfo=UTC),
         ),
     ],
 )

@@ -112,7 +112,7 @@ class MAETask(BaseTask):
             model, in_chans=in_channels, num_classes=0, pretrained=weights is True
         )
         if not isinstance(vit, VisionTransformer):
-            raise ValueError(
+            raise TypeError(
                 f'Model {model} is not a ViT architecture, which is required for MAE training.'
             )
 
